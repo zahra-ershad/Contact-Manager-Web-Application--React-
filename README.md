@@ -19,9 +19,8 @@
 - **React** - کتابخانه اصلی فرانت‌اند
 - **React Hooks** - useState, useEffect و سایر هوک‌ها
 - **JSON db** - ذخیره‌سازی داده‌ها در جیسون
-- **CSS Modules / Styled Components** - برای استایل‌دهی
-- **React Router** (اختیاری) - برای مسیریابی بین صفحات
-- **React Icons** (اختیاری) - برای آیکون‌های زیبا
+- **Styled Components** - برای استایل‌دهی
+- **React Router** - برای مسیریابی بین صفحات
 
 
 
