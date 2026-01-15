@@ -14,11 +14,9 @@ import { values } from "lodash";
 
 const AddContact = () => {
       const {loading ,
-            contact ,
-            onChangeContact ,
             groups ,
             creatContact,
-            // errors
+            errors
           } = useContext(ContactContext);
 
 
@@ -74,17 +72,14 @@ const AddContact = () => {
                           <input 
                             type="text" 
                             id="fullName"
-                            name="fullName" 
-                            onBlur={formik.handleBlur}
-                            value={formik.values.fullName}
-                            onChange={formik.handleChange}
+                            {...formik.getFieldProps("fullname")}
                             placeholder="نام و نام خانوداگی" 
                             className="form-input"
                              
                           />
                         </div>
                         {
-                          (formik.errors.fullName && formik.touched.fullName) ?
+                          (formik.touched.fullName&& formik.errors.fullName ) ?
 
                                   <p className="errMsg">{formik.errors.fullName}</p> 
                                   : null
@@ -93,12 +88,10 @@ const AddContact = () => {
                         <div className="form-group">
                           <input 
                             type="text" 
-                            name="photo"
                             id="photo"
-                            value={formik.values.photo}
-                            onChange={formik.handleChange} 
-                            placeholder="آدرس عکس" 
+                            {...formik.getFieldProps('photo')} 
                             className="form-input"
+                            placeholder="آدرس عکس"
                              
                           />
                         </div>
@@ -112,10 +105,8 @@ const AddContact = () => {
                         <div className="form-group">
                           <input 
                             type="number" 
-                            name="mobile"
                             id="mobile"
-                            value={formik.values.mobile}
-                            onChange={formik.handleChange} 
+                            {...formik.getFieldProps('mobile')}
                             placeholder="شماره موبایل" 
                             className="form-input"
                              
@@ -131,10 +122,8 @@ const AddContact = () => {
                         <div className="form-group">
                           <input 
                             type="email" 
-                            name="email" 
                             id="email" 
-                            value={formik.values.email}
-                            onChange={formik.handleChange}
+                           {...formik.getFieldProps('email')}
                             placeholder="آدرس ایمیل" 
                             className="form-input"
                              
@@ -150,10 +139,8 @@ const AddContact = () => {
                         <div className="form-group">
                           <input 
                             type="text" 
-                            name="job"
                             id="job" 
-                            value={formik.values.job}
-                            onChange={formik.handleChange}
+                            {...formik.getFieldProps('job')}
                             placeholder="شغل" 
                             className="form-input"
                              
@@ -168,10 +155,8 @@ const AddContact = () => {
                         
                         <div className="form-group">
                           <select 
-                          name="group"
                           id="group"
-                          value={formik.values.group}
-                          onChange={formik.handleChange}
+                          {...formik.getFieldProps('group')}
                           className="form-select">
                             {
                                 groups.length > 0 && groups.map(group =>(
@@ -203,14 +188,7 @@ const AddContact = () => {
                     </div>
                   </div>
                   <br />
-                  {
-                // !errors ? null :
-                // errors.map((error, index)=>(
-                //     <p className="errMsg" key={index}>
-                //       {error.message}
-                //     </p>
-                // ))
-              }
+                  
               <br />
                 </div>
               </div>
