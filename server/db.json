@@ -28,17 +28,7 @@
       "email": "kily@gmail.com",
       "job": "actor",
       "groups": "",
-      "group": "3"
-    },
-    {
-      "id": "392d",
-      "fullName": "سارا فاکس00",
-      "photo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCMl4iGs5TF78y_32Mh1g0jNGcV_dn39KYAA&s",
-      "mobile": "0974777777777",
-      "email": "fox@gmail.com",
-      "job": "HR manager",
-      "groups": "4",
-      "group": "5"
+      "group": "2"
     },
     {
       "id": "82a1",
@@ -46,7 +36,7 @@
       "photo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKWdpReLHtgFUtzmcvISIjkLgAUlCD9NMmzw&s",
       "mobile": "0955555555555",
       "email": "snow@gmail.com",
-      "job": "officer55",
+      "job": "HR manager",
       "groups": "1",
       "group": "4"
     }

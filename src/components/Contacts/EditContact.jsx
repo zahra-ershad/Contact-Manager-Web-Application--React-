@@ -1,76 +1,50 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useContext } from "react";
+import {Formik , Field , Form, ErrorMessage} from 'formik';
 
-import { getContact, updateContact , GetAllGroups  } from '../../services/contactService';
+
+import { getContact, updateContact  } from '../../services/contactService';
 import { ContactContext } from "../../context/contactContext";
 import Spinner from '../Spinner';
 import '../../App.css';
-import { all } from "axios";
+import {contactSchema} from '../../Validations/contactValidation';
+
 
 const EditContact = () => {
     const {loading , setLoading ,groups , contacts , setContacts , setFilteredContacts} = useContext(ContactContext);
     const navigate = useNavigate();
     const { contactId } = useParams();
 
-    const [state, setState] = useState({
-        loading: false,
-        contact: {
-            fullName: '',
-            photo: '',
-            mobile: '',
-            email: '',
-            job: '',
-            groups: ''
-        },
-        group: []
-    });
+
+    const[contact,setContact] = useState({});
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                setState({ ...state, loading: true });
-                const { data: contactData } = await getContact(contactId);
-                const { data: groupData } = await GetAllGroups();
+                setLoading(true);
 
-                setState({
-                    loading: false,
-                    contact: contactData,
-                    group: groupData
-                });
+                const { data: contactData } = await getContact(contactId);
+              
+                setLoading(false);
+                setContact(contactData);
             } catch (e) {
                 console.log(e.message);
-                setState({ ...state, loading: false });
+                setLoading(false);
             }
         }
         fetchData();
     }, [contactId]);
 
-    const onChangeContact = (event) => {
-        setState({
-            ...state,
-            contact: {
-                ...state.contact,  // ✅ اینجا باید state.contact باشه نه contact
-                [event.target.name]: event.target.value
-            },
-        });
-    };
-
-    const submitForm = async (event) => {
-        event.preventDefault();
+   
+    const submitForm = async (values) => {
         try {
             setLoading(true);
-            //setState({ ...state, loading: true });
-             // نکته:
-            // ما دو روش داشتیم ک مخاطب جدید میسازیم بیاد تو مخاطببا و قابل دیدن باشه بدون رفرش:
-            // 1. راه اول ریرندر کردن بود ک با فورس رندر و ست فورس رندر کارمیکرد اما حرفه ای نبود:
-            // (rerender) => forceRender=> setForceRender
-            // 2. ما حالا ی راه بهتر داریم همراه استاتوس دیتا روهم به کریت کانتکت میدیم و همه رو میریزیم تو ی ارایه کچون نمیشه  
-            // استیت رو تکه تکه کد  وبعد همه رو تو فیلترد کانتکت نمایش میدیم
-            // 3. ی راه سومی هم برای ادیت مخاطب داریم چون دیتا مقادیر ویرایش شده مخاطبو بر میگردونه همینجا جایگذاری کنیمو نمایش بدیم جای ارسال درخاوست مجدد  ب سرور
-          
-            const { data , status } = await updateContact(state.contact, contactId);  // ✅ از state.contact استفاده کن
-            setState({ ...state, loading: false });
+           
+            const { data , status } = await updateContact(values, contactId);  // ✅ از state.contact استفاده کن
+
+            setLoading(false);
+            setContact(values);
             if (status === 200) {
                 setLoading(false);
         
@@ -87,11 +61,11 @@ const EditContact = () => {
               }
         } catch (e) {
             console.log(e.message);
-            setState({ ...state, loading: false });
+            setLoading(false);
+           
         }
     };
 
-    const { contact, group } = state;
 
     return (
         <>
@@ -128,100 +102,115 @@ const EditContact = () => {
                             </div>
                             
                             <div className="edit-contact-form-col">
-                           
-                                <form onSubmit={submitForm} className="edit-contact-form">
-                                <div className="edit-form-fields">
-                                    <div className="edit-form-group full-width">
-                                    <label className="edit-form-label">نام و نام خانوادگی</label>
-                                    <input 
-                                        type="text"
+                                <Formik
+
+                                initialValues={contact}
+                                validationSchema ={contactSchema}
+
+                                onSubmit ={ (values) =>{
+                                submitForm(values)
+                                }}
+                                >
+
+                                <Form className="contact-form">
+                                    <div className="form-group">
+                                    <Field 
+                                        type="text" 
                                         name="fullName"
-                                        value={contact.fullName} 
-                                        onChange={onChangeContact}
-                                        required={true}
-                                        placeholder="نام و نام خانوادگی"
-                                        className="edit-form-input"
+                                        placeholder="نام و نام خانوداگی" 
+                                        className="form-input"
+                                        
                                     />
                                     </div>
+
+                                <ErrorMessage name="fullName"
+                                    render={(msg) =>
+                                    (<p className="errMsg" >{msg}</p>)
+                                    } />
                                     
-                                    <div className="edit-form-group">
-                                    <label className="edit-form-label">شماره تلفن</label>
-                                    <input 
-                                        type="number"
-                                        name="mobile"
-                                        value={contact.mobile} 
-                                        onChange={onChangeContact}
-                                        required={true}
-                                        placeholder="شماره تلفن"
-                                        className="edit-form-input"
-                                    />
-                                    </div>
-                                    
-                                    <div className="edit-form-group">
-                                    <label className="edit-form-label">ایمیل</label>
-                                    <input 
-                                        type="email"
-                                        name="email"
-                                        value={contact.email} 
-                                        onChange={onChangeContact}
-                                        required={true}
-                                        placeholder="ایمیل"
-                                        className="edit-form-input"
-                                    />
-                                    </div>
-                                    
-                                    <div className="edit-form-group">
-                                    <label className="edit-form-label">شغل</label>
-                                    <input 
-                                        type="text"
-                                        name="job"
-                                        value={contact.job} 
-                                        onChange={onChangeContact}
-                                        required={true}
-                                        placeholder="شغل"
-                                        className="edit-form-input"
-                                    />
-                                    </div>
-                                    
-                                    <div className="edit-form-group full-width">
-                                    <label className="edit-form-label">آدرس عکس</label>
-                                    <input 
-                                        type="text"
+                                    <div className="form-group">
+                                    <Field 
+                                        type="text" 
                                         name="photo"
-                                        value={contact.photo} 
-                                        onChange={onChangeContact}
-                                        required={true}
-                                        placeholder="آدرس URL عکس"
-                                        className="edit-form-input"
+                                        className="form-input"
+                                        placeholder="آدرس عکس"
+                                        
                                     />
                                     </div>
+                                <ErrorMessage name="photo" render={(msg) =>(
+                                    <p className="errMsg"> {msg} </p>
+                                )} />
                                     
-                                    <div className="edit-form-group full-width">
-                                    <label className="edit-form-label">گروه</label>
-                                    <select 
-                                        name="groups"
-                                        value={contact.groups}
-                                        onChange={onChangeContact}
-                                        required={true}
-                                        className="edit-form-select"
-                                    >
-                                        <option value="">انتخاب گروه</option>
-                                        {group.length > 0 &&
-                                        group.map((groupItem) => (
-                                            <option value={groupItem.id} key={groupItem.id}>
-                                            {groupItem.name}
-                                            </option>
-                                        ))
-                                        }
-                                    </select>
+                                    <div className="form-group">
+                                    <Field 
+                                        type="number" 
+                                        name="mobile"
+                                        placeholder="شماره موبایل" 
+                                        className="form-input"
+                                    />
                                     </div>
-                                </div>
+
+                                <ErrorMessage name='mobile'
+                                    render={(msg) =>(
+                                    <p className="errMsg"> {msg} </p>
+                                )} />
+                                    
+                                    <div className="form-group">
+                                    <Field 
+                                        type="email" 
+                                        name="email" 
+                                        placeholder="آدرس ایمیل" 
+                                        className="form-input"
+                                    />
+                                    </div>
+                                <ErrorMessage name="email" render={(msg) =>(
+                                    <p className="errMsg"> {msg} </p>
+                                )} />
+                                    
+                                    <div className="form-group">
+                                    <Field 
+                                        type="text" 
+                                        name="job" 
+                                        placeholder="شغل" 
+                                        className="form-input"
+                                        
+                                    />
+                                    </div>
+                                <ErrorMessage name="job" render={(msg) =>(
+                                    <p className="errMsg"> {msg} </p>
+                                )} />
+
+                                    <div className="form-group">
+                                    <Field 
+                                    as="select"
+                                    name="group"
+                                    className="form-select">
+                                        {
+                                            groups.length > 0 && groups.map(group =>(
+                                                <option value={group.id} key={group.id}>
+                                                    {group.name }
+                                                </option>
+                                            ))
+                                        }
+                                    </Field>
+                                    </div>
+                                    <ErrorMessage name="group" render={(msg) =>(
+                                    <p className="errMsg"> {msg} </p>
+                                )} />
                                 
-                                <div className="edit-form-actions">
-                                    <button type="submit" className="edit-submit-btn">ثبت تغییرات</button>
-                                    <Link to={'/contacts'} className="edit-back-btn">بازگشت</Link>
-                                </div>
-                                </form>
+                                    <div className="form-actions">
+                                    <input 
+                                        type="submit" 
+                                        value="ویرایش مخاطب" 
+                                        className="submit-btn"
+                                    />
+                                    <Link to={'/contacts'} className="back-btn">
+                                        بازگشت به لیست
+                                    </Link>
+                                    </div>
+                                </Form>
+                                
+                                </Formik>
                             </div>
                         </div>
                     </div>
