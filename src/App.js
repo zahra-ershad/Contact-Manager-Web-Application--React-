@@ -1,5 +1,5 @@
 // import Navbar from './Components/Navbar';
-// import Contacts from './Components/Contacts/Contacts';
+import Contacts from './Components/Contacts/Contacts';
 
 import {Route , Routes , useNavigate , Navigate} from 'react-router';
 import {useEffect,useState} from 'react';
