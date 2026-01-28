@@ -2,7 +2,8 @@
 // import Contacts from './Components/Contacts/Contacts';
 
 import {Route , Routes , useNavigate , Navigate} from 'react-router';
-import { useState ,useEffect} from 'react';
+import {useEffect,useState} from 'react';
+import {useImmer} from 'use-immer';
 import _ from 'lodash';
 
 
@@ -10,6 +11,7 @@ import _ from 'lodash';
 import{
   AddContact,
   Contacts,
+  Contact,
   EditContact,
   ViewContact,
   Navbar
@@ -28,8 +30,8 @@ import { confirmAlert } from 'react-confirm-alert';
 
 const App =() => {
 
-  const[loading,setLoading] = useState(false);
-  const [query , setQuery] = useState([]);
+  const[loading,setLoading] = useImmer(false);
+  const [query , setQuery] = useImmer([]);
   const [contact , setContact] = useState({
     fullName: "",
     photo: "",
@@ -38,9 +40,9 @@ const App =() => {
     job: "",
     group: "" 
   });
-  const [contacts , setContacts] = useState([]);
-  const [filteredContact , setFilteredContact] = useState([]);
-  const [groups,setGroups] = useState([]);
+  const [contacts , setContacts] = useImmer([]);
+  const [filteredContact , setFilteredContact] = useImmer([]);
+  const [groups,setGroups] = useImmer([]);
   //const [errors , setError] = useState([]);
 
   const navigate= useNavigate();
@@ -118,81 +120,51 @@ const App =() => {
     });
 }
 
- /*
-     * NOTE
-     * 1- forceRender -> setForceRender
-     * 2- Server Request
-     * 3- Delete Local State
-     * 4- Delete State Before Server Request
-     * در روش 4 قبل اینکه ب سرور درخواست بدیم از محلیها پاک میکنیم
-     * 
-     */
 
   const removeContact = async(contactId) =>{
-    const allContacts = [...contacts];
+    const contactBackUp = [...contacts];
     try{
-      const updatedContact = contacts.filter(c =>c.id !== contactId);
+      // const updatedContact = contacts.filter(c =>c.id !== contactId);
       
 
-      setContacts(updatedContact);
-      setFilteredContact(updatedContact);
+      // setContacts(updatedContact);
+      // setFilteredContact(updatedContact);
+
+      setContacts((draft)=> draft.filter((c)=> c.id !== contactId));
+      setFilteredContact((draft) => draft.filter((c)=> c.id !== contactId));
 
       // Sending delete request to server
       const { status } = await deletContact(contactId);
 
       if (status !== 200) {
-        setContacts(allContacts);
-        setFilteredContact(allContacts);
+        setContacts(contactBackUp);
+        setFilteredContact(contactBackUp);
       }
     }
     catch(e){
       console.log(e.message);
 
-      setContacts(allContacts);
-      setFilteredContact(allContacts);
+      setContacts(contactBackUp);
+      setFilteredContact(contactBackUp);
     }
   }
   
-  // نکته:
-  // ما دو روش داشتیم ک مخاطب جدید میسازیم بیاد تو مخاطببا و قابل دیدن باشه بدون رفرش:
-  // 1. راه اول ریرندر کردن بود ک با فورس رندر و ست فورس رندر کارمیکرد اما حرفه ای نبود:
-  // (rerender) => forceRender=> setForceRender
-  // 2. ما حالا ی راه بهتر داریم همراه استاتوس دیتا روهم به کریت کانتکت میدیم و همه رو میریزیم تو ی ارایه کچون نمیشه  
-  // استیت رو تکه تکه کد  وبعد همه رو تو فیلترد کانتکت نمایش میدیم
-
 
 
 
 
   const createContactForm= async (value) =>{
-    // event.preventDefault();
-
-    
     try{
-      // await contactSchema.validate(contact, { abortEarly: false });
-
-
     const {status , data} = await createContact(value);
 
 
-      setLoading((prevLoading) => !prevLoading);
+      setLoading(draft => !draft);
       if (status === 201){
        
-        const allContacts =[...contacts , data];
-        setContacts(allContacts);
 
-        setFilteredContact(allContacts);
+        setFilteredContact((draft) =>  {draft.push(data)});
+        setContacts((draft)=>   {draft.push(data)});
 
-        setContact({
-          fullName: "",
-          photo: "",
-          mobile: "",
-          email: "",
-          job: "",
-          group: ""
-        }); //این فرم خالی ارسال میشه تا بعد ثبت موفق مخاطب داده قبلی در اینپوتها پاک شه
-        
-        
         setLoading((prevLoading) => !prevLoading);
         navigate("/contacts");
         // setError([]);
@@ -237,11 +209,17 @@ const App =() => {
 
       //timeOut=setTimeout(() =>{
 
-        setFilteredContact( contacts.filter((contact)=>{
-          return contact.fullName
-          .toLowerCase()
-          .includes(query.toLowerCase());
-      }));
+      //   setFilteredContact( contacts.filter((contact)=>{
+      //     return contact.fullName
+      //     .toLowerCase()
+      //     .includes(query.toLowerCase());
+      // }));
+
+      setFilteredContact((draft) => draft.filter((c) =>
+       {return  c.fullName.toLowerCase().includes(query.toLowerCase())
+
+        })
+      );
 
      // },1000);
 

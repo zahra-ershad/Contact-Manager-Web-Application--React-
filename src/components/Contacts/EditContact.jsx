@@ -1,5 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect} from "react";
+import {useImmer} from 'use-immer';
 import { useContext } from "react";
 import {Formik , Field , Form, ErrorMessage} from 'formik';
 
@@ -17,7 +18,7 @@ const EditContact = () => {
     const { contactId } = useParams();
 
 
-    const[contact,setContact] = useState({});
+    const[contact,setContact] = useImmer({});
 
     useEffect(() => {
         const fetchData = async () => {
@@ -48,14 +49,27 @@ const EditContact = () => {
             if (status === 200) {
                 setLoading(false);
         
-                const allContacts = [...contacts];
-                const contactIndex = allContacts.findIndex(
-                  (c) => c.id === parseInt(contactId)
-                );
-                allContacts[contactIndex] = { ...data };
+                // const allContacts = [...contacts];
+                // const contactIndex = allContacts.findIndex(
+                //   (c) => c.id === parseInt(contactId)
+                // );
+                // allContacts[contactIndex] = { ...data };
         
-                setContacts(allContacts);
-                setFilteredContacts(allContacts);
+                // setContacts(allContacts);
+                setContacts((draft) =>{
+                    const contactIndex= draft.findIndex(
+                        (c) => c.id == parseInt(contactId)
+                    )
+                    draft[contactIndex] = {...data }
+                });
+
+                setFilteredContacts((draft) =>{
+                    const contactIndex = draft.findIndex(
+                        (c) => c.id == contactId
+                    )
+                    draft[contactIndex] = {...data}
+                })
+                // setFilteredContacts(allContacts);
         
                 navigate("/contacts");
               }
